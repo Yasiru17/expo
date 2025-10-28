@@ -6,11 +6,7 @@ import type {
   RNConfigReactNativePlatformsConfigAndroid,
 } from './reactNativeConfig.types';
 import type { ExpoModuleConfig } from '../ExpoModuleConfig';
-
-const fileExistsAsync = async (file: string): Promise<string | null> => {
-  const stat = await fs.stat(file).catch(() => null);
-  return stat?.isFile() ? file : null;
-};
+import { scanFilesRecursively, fileExistsAsync } from '../utils';
 
 export async function resolveDependencyConfigImplAndroidAsync(
   packageRoot: string,
@@ -133,39 +129,6 @@ export async function parsePackageNameAsync(
     }
   }
   return null;
-}
-
-async function* scanFilesRecursively(
-  parentPath: string,
-  includeDirectory?: (parentPath: string, name: string) => boolean,
-  sort = !fs.opendir
-) {
-  const queue = [parentPath];
-  let targetPath: string | undefined;
-  while (queue.length > 0 && (targetPath = queue.shift()) != null) {
-    try {
-      const entries = sort
-        ? (await fs.readdir(targetPath, { withFileTypes: true })).sort((a, b) =>
-            a.name.localeCompare(b.name)
-          )
-        : await fs.opendir(targetPath);
-      for await (const entry of entries) {
-        if (entry.isDirectory() && entry.name !== 'node_modules') {
-          if (!includeDirectory || includeDirectory(targetPath, entry.name)) {
-            queue.push(path.join(targetPath, entry.name));
-          }
-        } else if (entry.isFile()) {
-          yield {
-            path: path.join(targetPath, entry.name),
-            parentPath: targetPath,
-            name: entry.name,
-          } as const;
-        }
-      }
-    } catch {
-      continue;
-    }
-  }
 }
 
 /**
