@@ -1,3 +1,7 @@
 # ignore everything and force add a few important files
 *
 !.env
+!app/
+!app/**
+!DATABASE_README.md
+!package.json
