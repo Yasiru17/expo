@@ -5,3 +5,5 @@
 !app/**
 !DATABASE_README.md
 !package.json
+!README.md
+!.gitignore
